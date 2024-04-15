@@ -11,6 +11,72 @@
    Base styles: opinionated defaults
    ========================================================================== */
 
+body {
+  background-image: url("../images/background.jpg");
+  background-color: #cccccc;
+}
+
+body,
+html {
+  height: 100%;
+  margin: 0;
+}
+
+.split-container {
+  display: flex;
+  height: 100%;
+}
+.left-half {
+  flex: 1;
+  border-right: 1px solid black;
+}
+.right-half {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+table {
+  width: 100%;
+  background-color: green;
+}
+
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.table-container {
+  height: 50%;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background-color: #fff;
+}
+.message {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  background-color: blue;
+  color: #fff;
+  cursor: pointer;
+}
+
+.login-container {
+  padding: 8px;
+}
 html {
   color: #222;
   font-size: 1em;
@@ -172,9 +238,9 @@ textarea {
 }
 
 @media print,
-  (-webkit-min-device-pixel-ratio: 1.25),
-  (min-resolution: 1.25dppx),
-  (min-resolution: 120dpi) {
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 1.25dppx),
+(min-resolution: 120dpi) {
   /* Style adjustments for high resolution devices */
 }
 
@@ -185,6 +251,7 @@ textarea {
    ========================================================================== */
 
 @media print {
+
   *,
   *::before,
   *::after {
@@ -245,7 +312,10 @@ textarea {
   }
 }
 
-#booktable, #booktable tr, #booktable td, #booktable th {
+#booktable,
+#booktable tr,
+#booktable td,
+#booktable th {
   border: 2px solid black;
   border-collapse: collapse;
 }

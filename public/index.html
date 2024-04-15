@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crazy Words</title>
+  <title>Fruit Smash</title>
   <link rel="stylesheet" href="css/vendor/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="">
@@ -22,10 +22,51 @@
   <meta name="theme-color" content="#fafafa">
 </head>
 
+</head>
+
 <body>
+  <div class="split-container">
+    <canvas id="myCanvas" style="border:1px solid black;" width="1200" height="600"></canvas>
+    <div class="right-half">
+      <div class="login-container">
+        <input type="text" placeholder="Username">
+        <button>Login</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Score</th>
+          </tr>
+          <!-- <tr>
+            <td>Data 1</td>
+            <td>Data 2</td>
+          </tr> -->
+        </table>
+      </div>
+      <div class="chat-container">
+        <!-- <div class="message">message</div> -->
+      </div>
+      <div class="input-container">
+        <input type="text" placeholder="Type your message...">
+        <button>Send</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Your contents -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+  <script>
+    $(() => {
+      const canvas = $("#myCanvas")[0];
+      const ctx = canvas.getContext("2d");
 
+      //Create a canvas on the left half the page to accommodate a grid of fruit images 8 x 10
+      canvas.width = window.innerWidth / 2;
+      canvas.height = window.innerHeight;
+    });
+
+
+  </script>
   <script src="js/vendor/jquery.min.js" crossorigin="anonymous"></script>
   <script src="js/vendor/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script src="js/script.js"></script>

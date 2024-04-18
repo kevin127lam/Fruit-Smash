@@ -35,21 +35,45 @@ Promise.all(imagePromises)
             globalImages.push(imageObjects[i]);
         }
         console.log("Images loaded:", globalImages);
-        displayGrid(globalImages);
+        displayGrid(hardcodedGrid);
     })
     .catch((error) => {
         console.error("Error loading images:", error);
     });
 
-function createGrid() {
-    grid = new Array(8);
-    var r = 0, c = 0;
-    for (r = 0; r < 8; ++r) {
-        grid[r] = new Array(10);
-        for (c = 0; c < 10; ++c)
-            grid[r][c] = 0;
+// Hardcoded array of integers representing the fruit grid
+const hardcodedGrid = [
+    [1, 2, 3, 4, 5, 6, 7, 1, 2, 3],
+    [4, 5, 6, 7, 1, 2, 3, 4, 5, 6],
+    [7, 1, 2, 3, 4, 5, 6, 7, 1, 2],
+    [3, 4, 5, 6, 7, 1, 2, 3, 4, 5],
+    [6, 7, 1, 2, 3, 4, 5, 6, 7, 1],
+    [2, 3, 4, 5, 6, 7, 1, 2, 3, 4],
+    [5, 6, 7, 1, 2, 3, 4, 5, 6, 7],
+    [1, 2, 3, 4, 5, 6, 7, 1, 2, 3]
+];
+const canvas = $("#myCanvas")[0];
+const ctx = canvas.getContext("2d");
+// Function to display fruit grid on canvas
+function displayGrid(grid) {
+    const imageSize = 50; // Size of each image
+
+    //iterate through rows
+    for (let r = 0; r < grid.length; r++) {
+        //iterate through columns
+        for (let c = 0; c < grid[r].length; c++) {
+            //let each index indicate a cell
+            const fruitIndex = grid[r][c];
+            const imageSrc = imgs[fruitIndex];
+            const img = new Image();
+            img.onload = function () {
+                ctx.drawImage(img, c * imageSize, r * imageSize, imageSize, imageSize);
+            };
+            img.src = imageSrc // Assuming images are in 'images' directory
+        }
     }
 }
+
 
 
 /**

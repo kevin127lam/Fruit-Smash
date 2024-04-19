@@ -54,10 +54,9 @@ const hardcodedGrid = [
 ];
 const canvas = $("#myCanvas")[0];
 const ctx = canvas.getContext("2d");
+const imageSize = 50; // Size of each image
 // Function to display fruit grid on canvas
 function displayGrid(grid) {
-    const imageSize = 50; // Size of each image
-
     //iterate through rows
     for (let r = 0; r < grid.length; r++) {
         //iterate through columns
@@ -70,9 +69,129 @@ function displayGrid(grid) {
                 ctx.drawImage(img, c * imageSize, r * imageSize, imageSize, imageSize);
             };
             img.src = imageSrc // Assuming images are in 'images' directory
+            // console.log(grid[r][c]); check to see if indices are changed
         }
     }
 }
+
+// Keep track of the currently dragged fruit image
+let draggedImage = null;
+
+// Keep track of the starting position of the dragged image
+let startX = 0;
+let startY = 0;
+
+// mouse down handler
+canvas.addEventListener('mousedown', (event) => {
+    const mouseX = event.offsetX;
+    const mouseY = event.offsetY;
+
+    // find corresponding grid cell
+    const cellX = Math.floor(mouseX / imageSize);
+    const cellY = Math.floor(mouseY / imageSize);
+
+    // get index of clicked cell
+    const fruitIndex = hardcodedGrid[cellY][cellX];
+
+    // If there's a fruit in the clicked cell, start dragging it
+    if (fruitIndex !== 0) {
+        draggedImage = {
+            index: fruitIndex,
+            cellX: cellX,
+            cellY: cellY
+        };
+        // Store the starting position of the dragged image
+        startX = mouseX;
+        startY = mouseY;
+    }
+});
+
+/**STILL BUGGY BUT IDRC ANYMORE */
+// Event handler for mouse move event on the canvas
+canvas.addEventListener('mousemove', (event) => {
+    const mouseX = event.offsetX;
+    const mouseY = event.offsetY;
+
+    // If there is a dragged image, draw it at the current mouse position
+    if (draggedImage !== null) {
+        redrawCanvas();
+        // Draw the dragged fruit at the current mouse position
+        ctx.drawImage(globalImages[draggedImage.index], mouseX - imageSize / 2, mouseY - imageSize / 2, imageSize, imageSize);
+    }
+});
+
+function redrawCanvas() {
+    // Clear the entire canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Redraw the entire grid with all fruits
+    displayGrid(hardcodedGrid);
+}
+
+
+// Event handler for mouse up event on the canvas
+canvas.addEventListener('mouseup', (event) => {
+    if (draggedImage !== null) {
+        const mouseX = event.offsetX;
+        const mouseY = event.offsetY;
+        // Find the grid cell corresponding to the mouse position
+        const cellX = Math.floor(mouseX / imageSize);
+        const cellY = Math.floor(mouseY / imageSize);
+
+        // check if release occurs at a proper/adjacent cell
+        if (Math.abs(cellX - draggedImage.cellX) + Math.abs(cellY - draggedImage.cellY) === 1) {
+            // swap fruit indices
+            const temp = hardcodedGrid[cellY][cellX];
+            hardcodedGrid[cellY][cellX] = draggedImage.index;
+            hardcodedGrid[draggedImage.cellY][draggedImage.cellX] = temp;
+
+            // redraw grid
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            //this line is what is causing the fruit to show underneath
+            displayGrid(hardcodedGrid);
+        }
+        else {
+            // If not released over an adjacent cell, redraw the original grid
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            displayGrid(hardcodedGrid);
+        }
+        // Reset draggedImage to null
+        draggedImage = null;
+    }
+});
+
+function displayPlayerList(plist) {
+    // get ref to table
+    const tableBody = document.querySelector('.table-container table tbody');
+
+    // iterate over player info
+    plist.forEach(player => {
+        // create table row
+        const tableRow = document.createElement('tr');
+
+        // create table data cells
+        const playerName = document.createElement('td');
+        playerName.textContent = player.name;
+        const playerScore = document.createElement('td');
+        playerScore.textContent = player.score;
+
+        // append data cells
+        tableRow.appendChild(playerName);
+        tableRow.appendChild(playerScore);
+
+        // appedn data rows
+        tableBody.appendChild(tableRow);
+    });
+}
+
+// Testing data
+const players = [
+    { name: 'Player 1', score: 100 },
+    { name: 'Player 2', score: 150 },
+    { name: 'Player 3', score: 75 }
+];
+
+// Display the player list in the table
+displayPlayerList(players);
 
 
 

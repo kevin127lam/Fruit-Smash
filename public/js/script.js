@@ -1,3 +1,23 @@
+const socket = io.connect('http://callisto.cse.lehigh.edu:3000');
+const myUuid = uuidv4();
+
+$('button').click(function (e) {
+    let btnName = $(e.target).html();
+    if (btnName == "Login") {
+        socket.emit('login', { username: $('#username').val() });
+    }
+    //$('#mess').val('');
+    if (btnName == "Send") {
+        socket.emit('chatsend', { id: myUuid, message: $('#chat').val() });
+    }
+});
+
+socket.on('loginresponse', function(login){
+    let id = login.id;
+    let filteredusername = login.username;
+
+  });
+
 //put urls in an array
 const imgs = [
     '../images/background.png',
@@ -52,6 +72,8 @@ const hardcodedGrid = [
     [5, 6, 7, 1, 2, 3, 4, 5, 6, 7],
     [1, 2, 3, 4, 5, 6, 7, 1, 2, 3]
 ];
+
+
 const canvas = $("#myCanvas")[0];
 const ctx = canvas.getContext("2d");
 const imageSize = 50; // Size of each image
@@ -134,6 +156,8 @@ canvas.addEventListener('mouseup', (event) => {
         const mouseX = event.offsetX;
         const mouseY = event.offsetY;
         // Find the grid cell corresponding to the mouse position
+        const startCellX = Math.floor(startX / imageSize);
+        const startCellY = Math.floor(startY / imageSize);
         const cellX = Math.floor(mouseX / imageSize);
         const cellY = Math.floor(mouseY / imageSize);
 
@@ -148,6 +172,8 @@ canvas.addEventListener('mouseup', (event) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             //this line is what is causing the fruit to show underneath
             displayGrid(hardcodedGrid);
+
+            socket.emit('imageswap', { id: myUuid, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
         }
         else {
             // If not released over an adjacent cell, redraw the original grid
@@ -195,37 +221,14 @@ displayPlayerList(players);
 
 
 
-/**
- * socket.send(ln)
- * .on("receiveloginname", (qq) => {
- * })
- * 
- * 
- in idk.js
-in a for loop:
-function loadScript(src) {
-return new Promise(function(resolve, reject) {
-let script = document.createElement('script');//for image
-script.src = src; // let src be image src (array val)
-script.onload = () => resolve(script); // resolve(image element)
-script.onerror = () => reject(new Error(`Script load
-error for ${src}`));
-
-want img to align w value in directions (null for 0?)
-
-Promise.all([
-new Promise(resolve => setTimeout(() => resolve(1), 3000)),
-// 1
-new Promise(resolve => setTimeout(() => resolve(2), 2000)),
-// 2
-new Promise(resolve => setTimeout(() => resolve(3), 1000))
-// 3
-]).then(pass function (namely array of image function (funct that copies images)));
-// 1,2,3 when promises are ready: each promise contributes
-an array member
-
-document.head.append(script);
-
-});
+/*https://www.geeksforgeeks.org/how-to-create-a-guid-uuid-in-javascript/*/
+// Generate a random UUID
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+        .replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
 }
- */
+

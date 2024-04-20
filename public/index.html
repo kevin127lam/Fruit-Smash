@@ -29,7 +29,7 @@
     <canvas id="myCanvas" style="border:1px solid black;" width="1200" height="600"></canvas>
     <div class="right-half">
       <div class="login-container">
-        <input type="text" placeholder="Username">
+        <input type="text" id="username" placeholder="Username">
         <button>Login</button>
       </div>
       <div class="table-container">
@@ -48,12 +48,12 @@
         <!-- <div class="message">message</div> -->
       </div>
       <div class="input-container">
-        <input type="text" placeholder="Type your message...">
+        <input type="text" id = "chat" placeholder="Type your message...">
         <button>Send</button>
       </div>
     </div>
   </div>
-
+  
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
   <script>
     $(() => {
@@ -70,6 +70,7 @@
   </script>
   <script src="js/vendor/jquery.min.js" crossorigin="anonymous"></script>
   <script src="js/vendor/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="http://callisto.cse.lehigh.edu:3000/socket.io/socket.io.js"></script>
   <script src="js/script.js"></script>
 </body>
 

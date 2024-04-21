@@ -1,22 +1,45 @@
-const socket = io.connect('http://callisto.cse.lehigh.edu:3000');
+const socket = io.connect('http://eris.cse.lehigh.edu:3000');
 const myUuid = uuidv4();
 
 $('button').click(function (e) {
     let btnName = $(e.target).html();
+    // login event
     if (btnName == "Login") {
-        socket.emit('login', { username: $('#username').val() });
+        const userInput = $('#username').val();
+        if (userInput) {
+            socket.emit('login', userInput);
+            console.log('Login event:', { username });
+        }
+        $('#username').val('');
     }
-    //$('#mess').val('');
+
+    //chatsend event
     if (btnName == "Send") {
-        socket.emit('chatsend', { id: myUuid, message: $('#chat').val() });
+        const message = $('#chat').val();
+        if (message) {
+            socket.emit('chatsend', { id: playerId, message: message });
+            console.log('Chatsend event:', { id: playerId, message });
+        }
+        $('#chat').val('')
     }
 });
 
-socket.on('loginresponse', function(login){
-    let id = login.id;
-    let filteredusername = login.username;
+let playerId, playerUsername, playerMessage;
+socket.on('loginresponse', (data) => {
+    playerId = data.id;
+    playerUsername = data.filteredusername;
+    console.log('Login response:', { playerId, playerUsername });
+});
 
-  });
+socket.on('chatbroadcast', (data) => {
+    //data contains the username and the message
+    console.log('Chat broadcast: ', data);
+
+    //adds a message to chat container
+    $('.chat-container').append($('<div>').addClass('message').text(data));
+});
+
+
 
 //put urls in an array
 const imgs = [
@@ -55,23 +78,26 @@ Promise.all(imagePromises)
             globalImages.push(imageObjects[i]);
         }
         console.log("Images loaded:", globalImages);
-        displayGrid(hardcodedGrid);
+        displayGrid(fruitGrid);
     })
     .catch((error) => {
         console.error("Error loading images:", error);
     });
 
-// Hardcoded array of integers representing the fruit grid
-const hardcodedGrid = [
-    [1, 2, 3, 4, 5, 6, 7, 1, 2, 3],
-    [4, 5, 6, 7, 1, 2, 3, 4, 5, 6],
-    [7, 1, 2, 3, 4, 5, 6, 7, 1, 2],
-    [3, 4, 5, 6, 7, 1, 2, 3, 4, 5],
-    [6, 7, 1, 2, 3, 4, 5, 6, 7, 1],
-    [2, 3, 4, 5, 6, 7, 1, 2, 3, 4],
-    [5, 6, 7, 1, 2, 3, 4, 5, 6, 7],
-    [1, 2, 3, 4, 5, 6, 7, 1, 2, 3]
-];
+function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+}
+
+//generate fruit grid w random values
+const fruitGrid = [];
+for (let i = 0; i < 10; i++) {
+    fruitGrid[i] = [];
+    for (let j = 0; j < 8; j++) {
+        fruitGrid[i][j] = getRandomInt(1, 8);
+    }
+}
 
 
 const canvas = $("#myCanvas")[0];
@@ -113,7 +139,7 @@ canvas.addEventListener('mousedown', (event) => {
     const cellY = Math.floor(mouseY / imageSize);
 
     // get index of clicked cell
-    const fruitIndex = hardcodedGrid[cellY][cellX];
+    const fruitIndex = fruitGrid[cellY][cellX];
 
     // If there's a fruit in the clicked cell, start dragging it
     if (fruitIndex !== 0) {
@@ -146,7 +172,7 @@ function redrawCanvas() {
     // Clear the entire canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // Redraw the entire grid with all fruits
-    displayGrid(hardcodedGrid);
+    displayGrid(fruitGrid);
 }
 
 
@@ -164,21 +190,21 @@ canvas.addEventListener('mouseup', (event) => {
         // check if release occurs at a proper/adjacent cell
         if (Math.abs(cellX - draggedImage.cellX) + Math.abs(cellY - draggedImage.cellY) === 1) {
             // swap fruit indices
-            const temp = hardcodedGrid[cellY][cellX];
-            hardcodedGrid[cellY][cellX] = draggedImage.index;
-            hardcodedGrid[draggedImage.cellY][draggedImage.cellX] = temp;
+            const temp = fruitGrid[cellY][cellX];
+            fruitGrid[cellY][cellX] = draggedImage.index;
+            fruitGrid[draggedImage.cellY][draggedImage.cellX] = temp;
 
             // redraw grid
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             //this line is what is causing the fruit to show underneath
-            displayGrid(hardcodedGrid);
+            displayGrid(fruitGrid);
 
             socket.emit('imageswap', { id: myUuid, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
         }
         else {
             // If not released over an adjacent cell, redraw the original grid
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            displayGrid(hardcodedGrid);
+            displayGrid(fruitGrid);
         }
         // Reset draggedImage to null
         draggedImage = null;
@@ -231,4 +257,3 @@ function uuidv4() {
             return v.toString(16);
         });
 }
-

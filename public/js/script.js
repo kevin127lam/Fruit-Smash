@@ -39,6 +39,13 @@ socket.on('chatbroadcast', (data) => {
     $('.chat-container').append($('<div>').addClass('message').text(data));
 });
 
+socket.on('gridupdate', (data) => {
+    data = fruitGrid;
+    displayGrid(fruitGrid);
+    //data contains the username and the message
+    console.log('Grid updated: ', data);
+});
+
 
 
 //put urls in an array
@@ -198,8 +205,9 @@ canvas.addEventListener('mouseup', (event) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             //this line is what is causing the fruit to show underneath
             displayGrid(fruitGrid);
-
-            socket.emit('imageswap', { id: myUuid, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
+            socket.emit('imageswap', { id: playerId, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
+            console.log('Chatsend event:', { id: playerId, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
+            console.log('New grid', fruitGrid);
         }
         else {
             // If not released over an adjacent cell, redraw the original grid
@@ -257,3 +265,4 @@ function uuidv4() {
             return v.toString(16);
         });
 }
+

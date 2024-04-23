@@ -1,5 +1,4 @@
 const socket = io.connect('http://eris.cse.lehigh.edu:3000');
-const myUuid = uuidv4();
 
 $('button').click(function (e) {
     let btnName = $(e.target).html();
@@ -8,7 +7,7 @@ $('button').click(function (e) {
         const userInput = $('#username').val();
         if (userInput) {
             socket.emit('login', userInput);
-            console.log('Login event:', { username });
+            console.log('Login event:', { username: userInput });
         }
         $('#username').val('');
     }
@@ -39,13 +38,18 @@ socket.on('chatbroadcast', (data) => {
     $('.chat-container').append($('<div>').addClass('message').text(data));
 });
 
+let newGrid = [];
 socket.on('gridupdate', (data) => {
-    data = fruitGrid;
-    displayGrid(fruitGrid);
+    newGrid = data;
+    displayGrid(data);
     //data contains the username and the message
     console.log('Grid updated: ', data);
 });
 
+socket.on('playerslistupdate', (data) => {
+    console.log("Player list update: ", data);
+    displayPlayerList(data);
+});
 
 
 //put urls in an array
@@ -84,8 +88,8 @@ Promise.all(imagePromises)
         for (let i = 0; i < 8; i++) {
             globalImages.push(imageObjects[i]);
         }
-        console.log("Images loaded:", globalImages);
-        displayGrid(fruitGrid);
+        //console.log("Images loaded:", globalImages);
+        displayGrid(newGrid);
     })
     .catch((error) => {
         console.error("Error loading images:", error);
@@ -99,9 +103,9 @@ function getRandomInt(min, max) {
 
 //generate fruit grid w random values
 const fruitGrid = [];
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 8; i++) {
     fruitGrid[i] = [];
-    for (let j = 0; j < 8; j++) {
+    for (let j = 0; j < 10; j++) {
         fruitGrid[i][j] = getRandomInt(1, 8);
     }
 }
@@ -112,18 +116,12 @@ const ctx = canvas.getContext("2d");
 const imageSize = 50; // Size of each image
 // Function to display fruit grid on canvas
 function displayGrid(grid) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     //iterate through rows
     for (let r = 0; r < grid.length; r++) {
         //iterate through columns
         for (let c = 0; c < grid[r].length; c++) {
-            //let each index indicate a cell
-            const fruitIndex = grid[r][c];
-            const imageSrc = imgs[fruitIndex];
-            const img = new Image();
-            img.onload = function () {
-                ctx.drawImage(img, c * imageSize, r * imageSize, imageSize, imageSize);
-            };
-            img.src = imageSrc // Assuming images are in 'images' directory
+            ctx.drawImage(globalImages[grid[r][c]], c * imageSize, r * imageSize, imageSize, imageSize);
             // console.log(grid[r][c]); check to see if indices are changed
         }
     }
@@ -146,7 +144,7 @@ canvas.addEventListener('mousedown', (event) => {
     const cellY = Math.floor(mouseY / imageSize);
 
     // get index of clicked cell
-    const fruitIndex = fruitGrid[cellY][cellX];
+    const fruitIndex = newGrid[cellY][cellX];
 
     // If there's a fruit in the clicked cell, start dragging it
     if (fruitIndex !== 0) {
@@ -179,7 +177,7 @@ function redrawCanvas() {
     // Clear the entire canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // Redraw the entire grid with all fruits
-    displayGrid(fruitGrid);
+    displayGrid(newGrid);
 }
 
 
@@ -197,72 +195,74 @@ canvas.addEventListener('mouseup', (event) => {
         // check if release occurs at a proper/adjacent cell
         if (Math.abs(cellX - draggedImage.cellX) + Math.abs(cellY - draggedImage.cellY) === 1) {
             // swap fruit indices
-            const temp = fruitGrid[cellY][cellX];
-            fruitGrid[cellY][cellX] = draggedImage.index;
-            fruitGrid[draggedImage.cellY][draggedImage.cellX] = temp;
+            const temp = newGrid[cellY][cellX];
+            newGrid[cellY][cellX] = draggedImage.index;
+            newGrid[draggedImage.cellY][draggedImage.cellX] = temp;
 
             // redraw grid
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             //this line is what is causing the fruit to show underneath
-            displayGrid(fruitGrid);
+            displayGrid(newGrid);
             socket.emit('imageswap', { id: playerId, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
-            console.log('Chatsend event:', { id: playerId, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
-            console.log('New grid', fruitGrid);
+            console.log('Swap event:', { id: playerId, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
+            //console.log(newGrid);
+
         }
         else {
             // If not released over an adjacent cell, redraw the original grid
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            displayGrid(fruitGrid);
+            displayGrid(newGrid);
         }
         // Reset draggedImage to null
         draggedImage = null;
     }
 });
 
-function displayPlayerList(plist) {
-    // get ref to table
-    const tableBody = document.querySelector('.table-container table tbody');
+// function displayPlayerList(plist) {
+//     // get ref to table
+//     const tableBody = document.querySelector('.table-container table tbody');
 
-    // iterate over player info
-    plist.forEach(player => {
-        // create table row
-        const tableRow = document.createElement('tr');
+//     // iterate over player info
+//     plist.forEach(player => {
+//         // create table row
+//         const tableRow = document.createElement('tr');
 
-        // create table data cells
-        const playerName = document.createElement('td');
-        playerName.textContent = player.name;
-        const playerScore = document.createElement('td');
-        playerScore.textContent = player.score;
+//         // create table data cells
+//         let playerName = document.createElement('td');
+//         playerName.textContent = player.name;
+//         let playerScore = document.createElement('td');
+//         playerScore.textContent = player.score;
 
-        // append data cells
-        tableRow.appendChild(playerName);
-        tableRow.appendChild(playerScore);
+//         // append data cells
+//         tableRow.appendChild(playerName);
+//         tableRow.appendChild(playerScore);
 
-        // appedn data rows
-        tableBody.appendChild(tableRow);
+//         // appedn data rows
+//         tableBody.appendChild(tableRow);
+//     });
+// }
+
+function displayPlayerList(players) {
+    // Get a reference to the table body
+    const tableBody = $('.table-container table tbody');
+
+    players.forEach((player) => {
+        // Check if the player already has a row in the table
+        let existingRow = tableBody.find(`tr[data-name="${player.name}"]`);
+
+        if (existingRow.length > 0) {
+            // if the row exists update
+            existingRow.find('.player-score').text(player.score);
+        } else {
+            // If the row does not exist, create a new one
+            const row = $('<tr>').attr('data-name', player.name); // Use a data attribute to identify the row
+
+            const nameCell = $('<td>').text(player.name);
+            const scoreCell = $('<td>').addClass('player-score').text(player.score);
+
+            row.append(nameCell).append(scoreCell);
+            tableBody.append(row);
+        }
     });
-}
-
-// Testing data
-const players = [
-    { name: 'Player 1', score: 100 },
-    { name: 'Player 2', score: 150 },
-    { name: 'Player 3', score: 75 }
-];
-
-// Display the player list in the table
-displayPlayerList(players);
-
-
-
-/*https://www.geeksforgeeks.org/how-to-create-a-guid-uuid-in-javascript/*/
-// Generate a random UUID
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-        .replace(/[xy]/g, function (c) {
-            const r = Math.random() * 16 | 0,
-                v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
 }
 

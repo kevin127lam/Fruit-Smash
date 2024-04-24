@@ -1,4 +1,4 @@
-const socket = io.connect('http://eris.cse.lehigh.edu:3000');
+const socket = io.connect('http://neptune.cse.lehigh.edu:3000');
 
 $('button').click(function (e) {
     let btnName = $(e.target).html();
@@ -116,7 +116,7 @@ const ctx = canvas.getContext("2d");
 const imageSize = 50; // Size of each image
 // Function to display fruit grid on canvas
 function displayGrid(grid) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, 500, 400);
     //iterate through rows
     for (let r = 0; r < grid.length; r++) {
         //iterate through columns
@@ -175,7 +175,7 @@ canvas.addEventListener('mousemove', (event) => {
 
 function redrawCanvas() {
     // Clear the entire canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, 500, 400);
     // Redraw the entire grid with all fruits
     displayGrid(newGrid);
 }
@@ -200,7 +200,7 @@ canvas.addEventListener('mouseup', (event) => {
             newGrid[draggedImage.cellY][draggedImage.cellX] = temp;
 
             // redraw grid
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, 500, 400);
             //this line is what is causing the fruit to show underneath
             displayGrid(newGrid);
             socket.emit('imageswap', { id: playerId, image1Col: startCellX, image1Row: startCellY, image2Col: cellX, image2Row: cellY });
@@ -218,43 +218,18 @@ canvas.addEventListener('mouseup', (event) => {
     }
 });
 
-// function displayPlayerList(plist) {
-//     // get ref to table
-//     const tableBody = document.querySelector('.table-container table tbody');
-
-//     // iterate over player info
-//     plist.forEach(player => {
-//         // create table row
-//         const tableRow = document.createElement('tr');
-
-//         // create table data cells
-//         let playerName = document.createElement('td');
-//         playerName.textContent = player.name;
-//         let playerScore = document.createElement('td');
-//         playerScore.textContent = player.score;
-
-//         // append data cells
-//         tableRow.appendChild(playerName);
-//         tableRow.appendChild(playerScore);
-
-//         // appedn data rows
-//         tableBody.appendChild(tableRow);
-//     });
-// }
-
 function displayPlayerList(players) {
     // Get a reference to the table body
     const tableBody = $('.table-container table tbody');
 
     players.forEach((player) => {
-        // Check if the player already has a row in the table
+        // check if existing
         let existingRow = tableBody.find(`tr[data-name="${player.name}"]`);
 
         if (existingRow.length > 0) {
             // if the row exists update
             existingRow.find('.player-score').text(player.score);
-        } else {
-            // If the row does not exist, create a new one
+        } else { //otherwise create a new one
             const row = $('<tr>').attr('data-name', player.name); // Use a data attribute to identify the row
 
             const nameCell = $('<td>').text(player.name);

@@ -1,4 +1,4 @@
-const socket = io.connect('http://neptune.cse.lehigh.edu:3000');
+const socket = io.connect('http://vesta.cse.lehigh.edu:3000');
 
 $('button').click(function (e) {
     let btnName = $(e.target).html();
@@ -41,7 +41,10 @@ socket.on('chatbroadcast', (data) => {
 let newGrid = [];
 socket.on('gridupdate', (data) => {
     newGrid = data;
-    displayGrid(data);
+    if(globalImages){
+        displayGrid(data);
+    }
+    
     //data contains the username and the message
     console.log('Grid updated: ', data);
 });
@@ -219,25 +222,28 @@ canvas.addEventListener('mouseup', (event) => {
 });
 
 function displayPlayerList(players) {
-    // Get a reference to the table body
     const tableBody = $('.table-container table tbody');
 
+    // sort players by score
+    players.sort((a, b) => b.score - a.score);
+
+    // clear table to avoid duplicates
+    tableBody.empty();
+
+    // Add sorted player rows
     players.forEach((player) => {
-        // check if existing
-        let existingRow = tableBody.find(`tr[data-name="${player.name}"]`);
+        // create new row to append player name
+        const row = $('<tr>').attr('data-name', player.name); 
+        const nameCell = $('<td>').text(player.name); 
+        const scoreCell = $('<td>').addClass('player-score').text(player.score); 
 
-        if (existingRow.length > 0) {
-            // if the row exists update
-            existingRow.find('.player-score').text(player.score);
-        } else { //otherwise create a new one
-            const row = $('<tr>').attr('data-name', player.name); // Use a data attribute to identify the row
+        // append cells to the row
+        row.append(nameCell);
+        row.append(scoreCell);
 
-            const nameCell = $('<td>').text(player.name);
-            const scoreCell = $('<td>').addClass('player-score').text(player.score);
-
-            row.append(nameCell).append(scoreCell);
-            tableBody.append(row);
-        }
+        // append row to table 
+        tableBody.append(row);
     });
 }
+
 
